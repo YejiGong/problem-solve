@@ -1,12 +1,8 @@
-# Problem solve by python
-### *Algorithm Problem Solving*
+# Problem solve
 
 #### Platform
   - baekjoon
   - programmers
-
-#### Language
-   - python
 
 
 *All files are automatically pushed by BaekjoonHub.*  
