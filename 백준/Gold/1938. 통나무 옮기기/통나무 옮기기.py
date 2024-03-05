@@ -1,156 +1,80 @@
-from sys import stdin
-input = stdin.readline
+import sys
 from collections import deque
+input = sys.stdin.readline
+N=int(input())
+map = []
+loc=[]
+dest = []
+for i in range(N):
+    tmp = list(input())
+    map.append(tmp)
+    for j in range(N):
+        if tmp[j]=='B':
+            loc.append((i,j))
+        if tmp[j] == 'E':
+            dest.append((i,j))
 
-def checkDir(temp):
-    if temp[0][1] == temp[1][1]:
-        return 0    # 세로 방향 : 0
-    return 1        # 가로 방향 : 1
+def check_direction(loc):
+    if loc[0][1] == loc[1][1]: #세로 방향
+        return 1
+    else: #가로 방향
+        return 0
 
-def checkVisited(temp, d, cnt):
-    if temp not in visited:   # 첫 방문
-        visited.add(temp)
-        q.append((temp, d, cnt+1))
-
+dx=[-1,1,0,0]
+dy=[0,0,-1,1]
+#U,D,L,R
+#T -> 중간점 제외 나머지 양 두 점: x-1,y-1 / x+1+y+1
+result = 0
+queue = deque([(loc,check_direction(loc),0)])
+visit = set((loc[1],check_direction(loc)))
 def bfs():
-    while q:
-        newTemp, d, cnt = q.popleft()
-        if newTemp == goal:     # 타겟 위치 도착
-            return cnt
-
-        if d == 0:      # 세로 방향일 때
-            for cmd in range(5):
-                # U
-                if cmd == 0:
-                    col = deque(newTemp)
-                    r, c = col[0]
-                    if (0 <= r-1 < N) and plain[r-1][c] == "0":
-                        col.pop()
-                        col.appendleft((r-1, c))
-                        checkVisited(tuple(col), 0, cnt)
-
-                # D
-                elif cmd == 1:
-                    col = deque(newTemp)
-                    r, c = col[-1]
-                    if (0 <= r+1 < N) and plain[r+1][c] == "0":
-                        col.popleft()
-                        col.append((r+1, c))
-                        checkVisited(tuple(col), 0, cnt)
-
-                # L
-                elif cmd == 2:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (0 <= c-1 < N) or plain[r][c-1] == "1":
-                            flag = 0
-                            break
-                    if flag:
-                        col = tuple([(r, c-1) for r, c in newTemp])
-                        checkVisited(col, 0, cnt)
-
-                # R
-                elif cmd == 3:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (0 <= c+1 < N) or plain[r][c+1] == "1":
-                            flag = 0
-                            break
-                    if flag:
-                        col = tuple([(r, c+1) for r, c in newTemp])
-                        checkVisited(col, 0, cnt)
-
-                # T
+    global result
+    while queue:
+        loc, dir, num = queue.popleft()
+        if(loc==dest):
+            result = min(result,num) if result>0 else num
+            return num
+        for i in range(4):
+            new_loc = []
+            for x,y in loc:
+                nx = x+dx[i]
+                ny = y+dy[i]
+                if(0<=nx<N and 0<=ny<N and map[nx][ny]!='1'):
+                    new_loc.append((nx, ny))
                 else:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (1 <= c < N-1):
-                            flag = 0
-                            break
-                        if plain[r][c-1] == "1" or plain[r][c+1] == "1":
-                            flag = 0
-                            break
-                    if flag:	# 가능한 경우
-                        cr, cc = newTemp[1]     	# 중심 좌표
-                        row = ((cr, cc-1), (cr, cc), (cr, cc+1))
-                        checkVisited(row, 1, cnt)	# 방향 바꾸며 큐에 담기
-
-        else:       # 가로 방향일 때
-            for cmd in range(5):
-                # U
-                if cmd == 0:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (0 <= r-1 < N) or plain[r-1][c] == "1":
-                            flag = 0
-                            break
-                    if flag:
-                        row = tuple([(r-1, c) for r, c in newTemp])
-                        checkVisited(row, 1, cnt)
-
-                # D
-                elif cmd == 1:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (0 <= r+1 < N) or plain[r+1][c] == "1":
-                            flag = 0
-                            break
-                    if flag:
-                        row = tuple([(r+1, c) for r, c in newTemp])
-                        checkVisited(row, 1, cnt)
-
-                # L
-                elif cmd == 2:
-                    row = deque(newTemp)
-                    r, c = row[0]
-                    if (0 <= c-1 < N) and plain[r][c-1] == "0":
-                        row.pop()
-                        row.appendleft((r, c-1))
-                        checkVisited(tuple(row), 1, cnt)
-
-                # R
-                elif cmd == 3:
-                    row = deque(newTemp)
-                    r, c = row[-1]
-                    if (0 <= c+1 < N) and plain[r][c+1] == "0":
-                        row.popleft()
-                        row.append((r, c+1))
-                        checkVisited(tuple(row), 1, cnt)
-
-                # T
+                    break
+            if len(new_loc)==3 and (new_loc[1],dir) not in visit:
+                visit.add((new_loc[1],dir))
+                queue.append((new_loc,dir,num+1))
+        new_loc = []
+        new_dir = 0 if dir==1 else 1
+        flag = True
+        if(loc[1][1]==loc[0][1]):
+            #y값이 같다 -> 세로로 늘어져있는 중
+            for x,y in loc:
+                if(0<=y+1<N and 0<=y-1<N and map[x][y+1]!='1' and map[x][y-1]!='1'):
+                    continue
                 else:
-                    flag = 1
-                    for r, c in newTemp:
-                        if not (1 <= r < N-1):
-                            flag = 0
-                            break
-                        if plain[r+1][c] == "1" or plain[r-1][c] == "1":
-                            flag = 0
-                            break
-                    if flag:
-                        cr, cc = newTemp[1]
-                        col = ((cr-1, cc), (cr, cc), (cr+1, cc))
-                        checkVisited(col, 0, cnt)
-    return 0
+                    flag = False
+                    break
+            if(flag):
+                new_loc = [(loc[0][0]+1,loc[0][1]-1), loc[1],(loc[2][0]-1,loc[2][1]+1)]
+                if ((new_loc[1],new_dir) not in visit):
+                    visit.add((new_loc[1],new_dir))
+                    queue.append((new_loc,new_dir,num+1))
+        else:
+            #x값이 같다 -> 가로로 늘어져있는 중
+            for x,y in loc:
+                if(0<=x+1<N and 0<=x-1<N and map[x+1][y]!='1' and map[x-1][y]!='1'):
+                    continue
+                else:
+                    flag = False
+                    break
+            if(flag):
+                new_loc = [(loc[0][0]-1, loc[0][1]+1), loc[1], (loc[2][0]+1, loc[2][1]-1)]
+                if ((new_loc[1], new_dir) not in visit):
+                    visit.add((new_loc[1], new_dir))
+                    queue.append((new_loc, new_dir, num + 1))
 
-N = int(input())
-start, goal = [], [] 
-plain = []
-for r in range(N):
-    plain.append(list(input().rstrip()))
-    for c in range(N):
-        if plain[r][c] == "B":
-            start.append((r, c))
-            plain[r][c] = "0"
-        elif plain[r][c] == "E":
-            goal.append((r, c))
-            plain[r][c] = "0"
-
-startDir = checkDir(start)  # 세로 방향 0, 가로 방향 1
-goal = tuple(goal)
- 
-visited = set()
-visited.add(tuple(start))
-q = deque([(start, startDir, 0)])
-
-print(bfs())
+bfs()
+print(result)
