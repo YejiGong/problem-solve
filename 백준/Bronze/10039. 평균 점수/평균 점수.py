@@ -1,0 +1,6 @@
+A = max(int(input()),40)
+B = max(int(input()),40)
+C = max(int(input()),40)
+D = max(int(input()),40)
+E = max(int(input()),40)
+print((A+B+C+D+E)//5)
