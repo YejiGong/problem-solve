@@ -6,17 +6,18 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int N = Integer.parseInt(br.readLine());
         StringTokenizer st = new StringTokenizer(br.readLine());
-        List<Long> menus = new LinkedList<>();
+        ArrayList<Long> menus = new ArrayList<>();
         for(int i=0; i<N; i++){
             long tmp = Long.parseLong(st.nextToken());
             menus.add(tmp);
         }
-        menus.sort(Comparator.naturalOrder());
+        Collections.sort(menus);
+
         long answer = 0L;
         long[] nums = new long[N+1];
-        nums[0] = 1;
+        nums[0] = 1L;
         for (int i = 1; i < N + 1; i++) {
-            nums[i] = (nums[i - 1] * 2);
+            nums[i] = (nums[i - 1] * 2L);
             nums[i] %= 1000000007;
         }
         for(int i=0; i<N; i++){
